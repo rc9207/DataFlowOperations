@@ -6,12 +6,11 @@
 
 package bin;
 
-import com.opencsv.CSVReader;
+
 import com.opencsv.exceptions.CsvValidationException;
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -19,8 +18,13 @@ import java.util.List;
 
 public class ParseCsv {
 
-  private List rows = new ArrayList();
+  private static List<String[]> rows = new ArrayList();
   private String csvFile;
+
+  public static List<String[]> getRows() {
+
+    return rows;
+  }
 
   /**
    * Check to see if CSV file exists. If file exists read the CSV file.
@@ -55,29 +59,36 @@ public class ParseCsv {
    */
   private void readCsv() throws IOException, CsvValidationException {
 
-    FileInputStream csvStream = new FileInputStream(csvFile);
-    InputStreamReader inputStream = new InputStreamReader(csvStream, StandardCharsets.UTF_8);
-    CSVReader csvReader = new CSVReader(inputStream);
+    String line;
+    int counter = 0;
 
-    String[] nextLine;
+    BufferedReader buffReader = new BufferedReader(new FileReader(csvFile));
 
-    while ((nextLine = csvReader.readNext()) != null) {
-      rows.add(nextLine);
+    while ((line = buffReader.readLine()) != null) {
+
+      try {
+
+        if (line != null) {
+          rows.add(counter, line.split(",+"));
+          counter++;
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
-
-    csvReader.close();
+    rows.remove(0);
   }
 
   /**
-   * Method to print desired CSV file to the console.
+   * Method used to print the CSV to the console.
    */
   protected void printCsv() {
 
-    for (Object row : rows) {
-      for (String stringVal : (String[]) row) {
-        System.out.print(stringVal + ", ");
+    for (String[] row : rows) {
+      for (String result : row) {
+        System.out.print(result);
       }
-      System.out.println("\b\b\n----------------------------------------------------------------");
+      System.out.println("\n---------------------------------------------------------------------");
     }
   }
 }
